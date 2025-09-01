@@ -3,7 +3,9 @@ from typing import Optional, Tuple, Union
 
 import torch
 
-class GRPOTrainer:
+from .trainer_base import BaseTrainer
+
+class GRPOTrainer(BaseTrainer):
     def __init__(self, model, device, reward_model, cfg):
 
         self.var = model
@@ -71,7 +73,27 @@ class GRPOTrainer:
         ref_per_token_logps = self.get_per_token_logps(logits_BlVs_ref, idx_Bls)
         per_token_logps = self.get_per_token_logps(logits_BlVs, idx_Bls)
 
-        return ref_per_token_logps, per_token_logps, advantages
+        ratio = torch.exp(per_token_logps - ref_per_token_logps)
+        clipped_ratio = torch.clamp(ratio, 1-self.clip_range, 1+self.clip_range)
+        per_token_loss = torch.min(ratio * advantages, clipped_ratio * advantages)
+
+        per_token_kl = torch.exp(ref_per_token_logps - per_token_logps) - (ref_per_token_logps - per_token_logps) - 1
+
+        loss = per_token_loss + self.beta * per_token_kl
+        loss = -loss.sum(dim=1).mean()
+
+        return loss, per_token_loss, per_token_kl
+
+    def step(self, batch):
+        pass
+    
+    @classmethod
+    def build_from_cfg(cls, cfg, device, **kwargs):
+
+        model = kwargs.get("model", None)
+        reward_model = kwargs.get("reward_model", None)
+        
+        return cls(model, device, reward_model, cfg)
 
 if __name__ == "__main__":
 

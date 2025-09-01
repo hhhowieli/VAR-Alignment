@@ -11,7 +11,6 @@ from open_clip import create_model_from_pretrained, get_tokenizer
 import argparse
 
 
-
 @torch.no_grad()
 def calculate_clip_score(prompts, images, clip_model, device):
     texts = clip.tokenize(prompts, truncate=True).to(device=device)

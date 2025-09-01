@@ -1,0 +1,32 @@
+
+model:
+  var_arch: grpo
+  patch_nums: [1, 2, 3, 4, 5, 6, 8, 10, 13, 16]   # 10 steps by default
+  # VQVAE args
+  vqvae:
+    V: 4096
+    Cvae: 32
+    ch: 160
+    share_quant_resi: 4
+  # VAR args
+  var:
+    num_classes: 1000
+    depth: 16
+    shared_aln: false
+    attn_l2_norm: true
+    flash_if_available: true
+    fused_if_available: true
+    init_adaln: 0.5
+    init_adaln_gamma: 1e-5
+    init_head: 0.02
+    init_std: -1
+
+trainer:
+  arch: grpo
+
+reward_model:
+  arch: clipscore
+  clip_score_path: "hf-hub:apple/DFN5B-CLIP-ViT-H-14-384"
+
+train:
+  all_steps: 1000

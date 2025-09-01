@@ -7,7 +7,7 @@ import torch.nn as nn
 # from thirdparty.VAR.models import VAR, gumbel_softmax_with_rng, sample_with_top_k_top_p_
 # from thirdparty.VAR.models.helpers import gumbel_softmax_with_rng, sample_with_top_k_top_p_
 
-from models.VAR import VAR, gumbel_softmax_with_rng, sample_with_top_k_top_p_
+from .VAR import VAR, gumbel_softmax_with_rng, sample_with_top_k_top_p_
 
 class VAR_GRPO(VAR):
     def __init__(
