@@ -78,14 +78,22 @@ def train_one_step(
 
 def main(args):
 
+    accelerate = accelerate.Accelerator()
+
     cfg = OC.load(args.config)
     print(cfg)
 
     (model_cfg, trainer_cfg,
      reward_model_cfg, train_cfg) = cfg.model, cfg.trainer, cfg.reward_model, cfg.train
-    var_model = build_vae_var_rl(args.device, model_cfg)
+    vqvae, var_model = build_vae_var_rl(args.device, model_cfg)
     reward_model = build_reward_model(args.device, reward_model_cfg)
-    reward_model.eval()
+
+    vae_ckpt = 'vae_ch160v4096z32.pth'
+    if dist.is_local_master():
+        if not os.path.exists(vae_ckpt):
+            os.system(f'wget https://huggingface.co/FoundationVision/var/resolve/main/{vae_ckpt}')
+    dist.barrier()
+    vqvae.load_state_dict(torch.load(vae_ckpt, map_location='cpu'), strict=True)
 
     names, paras, para_groups = filter_params(var_model, nowd_keys={
         'cls_token', 'start_token', 'task_token', 'cfg_uncond',
@@ -96,7 +104,7 @@ def main(args):
     })
 
     optimizer = torch.optim.AdamW(para_groups, lr=train_cfg.lr)
-    
+
     train_set, test_set = get_dataset()
     train_loader = DataLoader(train_set, batch_size=1, shuffle=True, num_workers=4, drop_last=True)
 
