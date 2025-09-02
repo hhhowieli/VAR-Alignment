@@ -1,8 +1,8 @@
 from typing import Tuple
 import torch.nn as nn
 
-from models.VAR.var import VAR
-from models.VAR.vqvae import VQVAE
+from models.var_model.var import VAR
+from models.var_model.vqvae import VQVAE
 
 from models import VAR_GRPO
 

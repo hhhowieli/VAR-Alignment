@@ -85,14 +85,23 @@ class GRPOTrainer(BaseTrainer):
         return loss, per_token_loss, per_token_kl
 
     def step(self, batch):
-        pass
-    
+        _, label = batch
+
+        label = label.repeat(1, self.cfg.B)
+
+        loss, per_token_loss, per_token_kl = self.GRPO_step(
+            B=label.size(0),
+            label_B=label,
+        )
+
+        return loss, per_token_loss, per_token_kl
+
     @classmethod
     def build_from_cfg(cls, cfg, device, **kwargs):
 
         model = kwargs.get("model", None)
         reward_model = kwargs.get("reward_model", None)
-        
+
         return cls(model, device, reward_model, cfg)
 
 if __name__ == "__main__":

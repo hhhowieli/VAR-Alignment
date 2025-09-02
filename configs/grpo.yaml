@@ -23,6 +23,9 @@ model:
 
 trainer:
   arch: grpo
+  beta: 0.04
+  clip_range: 0.2
+  B: 8
 
 reward_model:
   arch: clipscore
@@ -30,3 +33,4 @@ reward_model:
 
 train:
   all_steps: 1000
+  batch_size: 1
